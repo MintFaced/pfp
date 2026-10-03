@@ -1,0 +1,66 @@
+{
+  "name": "@mintfaced/pfp",
+  "version": "0.1.0",
+  "description": "Hexagon profile pictures for collectors: the faces on mintface.art and theline.wtf.",
+  "license": "MIT",
+  "type": "module",
+  "repository": "github:MintFaced/pfp",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./server": {
+      "types": "./types/server.d.ts",
+      "default": "./src/server.js"
+    },
+    "./react": {
+      "types": "./types/react.d.ts",
+      "default": "./src/react.js"
+    },
+    "./hexagon.css": "./hexagon.css"
+  },
+  "files": [
+    "src",
+    "types",
+    "hexagon.css",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  },
+  "peerDependencies": {
+    "heic-decode": "^2.0.0",
+    "react": ">=18",
+    "sharp": ">=0.33",
+    "viem": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "heic-decode": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "sharp": {
+      "optional": true
+    },
+    "viem": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "heic-decode": "^2.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sharp": "^0.34.0",
+    "viem": "^2.21.0"
+  }
+}

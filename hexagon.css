@@ -1,0 +1,77 @@
+/* @mintfaced/pfp: the hexagon.
+   A pointy-top hexagon, the same shape at every size. No border and no shadow
+   at rest; under a pointer or a finger the outline draws itself, a pixel of
+   ink, and the picture lifts two. Nothing rotates, bounces or glows.
+
+   Themed by the host, on :root or anywhere above the face:
+     --pfp-ink    the outline, and the caption while held
+     --pfp-paper  under a placeholder, and behind a caption
+     --pfp-meta   captions and quiet buttons
+     --pfp-sunk   behind a picture still arriving
+     --pfp-rule   the edge of a floating panel
+     --pfp-alert  a message that went wrong
+     --pfp-mono   the caption face */
+.pfp{position:relative;display:inline-block;flex:none;width:var(--s,32px);height:var(--s,32px);
+  vertical-align:middle;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
+  -webkit-tap-highlight-color:transparent}
+.pfp .face{position:absolute;inset:0;overflow:hidden;background:var(--pfp-sunk,#f2f2f2);
+  clip-path:polygon(50% 0,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%);
+  transition:transform .2s ease-out,opacity .35s ease}
+.pfp .face img{display:block;width:100%;height:100%;object-fit:cover;transition:opacity .5s ease}
+/* Nobody's picture yet: what they have held longest, faintly, on paper. */
+.pfp .face.none{background:var(--pfp-paper,#fff)}
+.pfp .face.none img{opacity:.35}
+.pfp .face.held{opacity:0}
+.pfp .edge{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;
+  transition:transform .2s ease-out}
+.pfp .edge polygon{fill:none;stroke:var(--pfp-ink,#111);stroke-dasharray:100;stroke-dashoffset:100;
+  stroke-linejoin:round;transition:stroke-dashoffset .2s ease-out}
+/* Nobody's picture and nothing held: the shape alone, in a hairline, so a row
+   keeps its rhythm and an empty face is still somewhere to tap. */
+.pfp.empty .edge polygon{stroke:var(--pfp-rule,#e5e5e5);stroke-dashoffset:0}
+.pfp.empty.on .edge polygon,.pfp.empty.mine:focus-visible .edge polygon{stroke:var(--pfp-ink,#111)}
+@media(hover:hover){
+  .pfp.empty:hover .edge polygon{stroke:var(--pfp-ink,#111)}
+  .pfp:hover .edge polygon{stroke-dashoffset:0}
+  .pfp:hover .face,.pfp:hover .edge{transform:translateY(-2px)}
+}
+.pfp.on .edge polygon{stroke-dashoffset:0}
+.pfp.on .face,.pfp.on .edge{transform:translateY(-2px)}
+.pfp.mine{cursor:pointer}
+.pfp.mine:focus-visible{outline:none}
+.pfp.mine:focus-visible .edge polygon{stroke-dashoffset:0}
+/* Held down: what they have kept, and for how long. */
+.pfp.holding .face.held{opacity:1}
+.pfp.holding .face:not(.held){opacity:0}
+.pfp .cap{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);z-index:6;
+  font-family:var(--pfp-mono,ui-monospace,SFMono-Regular,Menlo,monospace);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  white-space:nowrap;color:var(--pfp-meta,#757575);background:var(--pfp-paper,#fff);padding:1px 5px;pointer-events:none;
+  opacity:0;transition:opacity .35s ease}
+.pfp.holding .cap.hold{opacity:1;color:var(--pfp-ink,#111)}
+.pfp .cap.add{opacity:1;font-size:9.5px}
+/* The first reveal: once, unprompted, then gone. */
+.pfp.reveal .edge polygon{animation:pfp-reveal 1.5s ease-out 1}
+@keyframes pfp-reveal{0%{stroke-dashoffset:100;opacity:1}50%{stroke-dashoffset:0;opacity:1}
+  80%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+/* Cropping, in the face itself. */
+.pfp-crop{display:inline-block;touch-action:none}
+.pfp.cropping{cursor:grab;touch-action:none}
+.pfp.cropping:active{cursor:grabbing}
+.pfp.cropping .edge polygon{stroke-dashoffset:0;stroke:var(--pfp-meta,#757575)}
+.pfp .face img.crop{position:absolute;max-width:none;width:auto;height:auto;transition:none;opacity:1}
+.pfp-panel{display:flex;flex-direction:column;align-items:flex-start}
+.pfp-acts{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px}
+.pfp-acts button{background:none;border:0;padding:4px 0;cursor:pointer;color:var(--pfp-meta,#757575);
+  font-family:var(--pfp-mono,ui-monospace,SFMono-Regular,Menlo,monospace);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  border-bottom:1px solid transparent}
+.pfp-acts button:hover{color:var(--pfp-ink,#111);border-bottom-color:var(--pfp-ink,#111)}
+.pfp-acts button[data-p="save"]{color:var(--pfp-ink,#111);border-bottom-color:var(--pfp-ink,#111)}
+.pfp-acts button:disabled{opacity:.45;cursor:default}
+.pfp-say{font-family:var(--pfp-mono,ui-monospace,SFMono-Regular,Menlo,monospace);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--pfp-meta,#757575);margin:8px 0 0;min-height:1em}
+.pfp-say.bad{color:var(--pfp-alert,#b3261e)}
+@media(prefers-reduced-motion:reduce){
+  .pfp .face,.pfp .edge,.pfp .edge polygon,.pfp .cap,.pfp .face img{transition:none}
+  .pfp:hover .face,.pfp:hover .edge,.pfp.on .face,.pfp.on .edge{transform:none}
+  .pfp.reveal .edge polygon{animation:none}
+}
