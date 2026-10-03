@@ -151,6 +151,15 @@ test('sources: OpenSea defaults, ENS hints, X at full size, the peer and its lis
   assert.deepEqual(await peer(A(3)), { none: true });
   assert.deepEqual(calls, ['https://other/api/pfp/list', `https://other/api/pfp/${A(1)}`, `https://other/api/pfp/${A(2)}`],
     'the list read once, and a wallet not on it never asked about');
+  /* With a list mode and no list: nobody is asked, and the list is not asked
+     for again on every wallet. */
+  let listAsks = 0; let one = 0;
+  const gone = peerSource({ base: 'https://other', index: true, fetch: async (url) => {
+    if (url.endsWith('/api/pfp/list')) { listAsks++; return new Response('no', { status: 404 }); }
+    one++; return new Response('{}', { status: 404 });
+  } });
+  for (let i = 0; i < 50; i++) await gone(A(i));
+  assert.deepEqual([listAsks, one], [1, 0], 'one list fetch a minute, and no per-wallet questions without it');
   const down = peerSource({ base: 'https://other', fetch: async () => { throw new Error('timeout'); } });
   assert.deepEqual(await down(A(1)), { error: 'peer did not answer' }, 'fail-open: the chain goes on');
   assert.deepEqual(await peerSource({ base: '' })(A(1)), { none: true }, 'no peer, nothing to say');

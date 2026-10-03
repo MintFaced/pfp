@@ -10,12 +10,14 @@
  * the chain goes on to OpenSea. A peer that says the collector chose no
  * picture ends the chain: { none, chosen }.
  *
- * index: a site with far more wallets than the other has faces for can read
- * the other's whole list once (GET /api/pfp/list, { addresses }) and ask
- * only about the wallets on it, instead of once for every wallet it has. If
- * the list will not come, it asks about every wallet, as without one. (Not
- * /api/pfp/index: a host with clean URLs on redirects anything ending in
- * /index to the path without it.)
+ * index: a site with far more wallets than the other has faces for reads
+ * the other's whole list (GET /api/pfp/list, { addresses }) every indexTtl and
+ * asks only about the wallets on it, instead of once for every wallet it has.
+ * Without a list it asks about nobody: a hundred thousand questions to a
+ * gallery that is down, or not yet answering, is the thing the list exists to
+ * avoid, and the monthly refresh will ask again. A failed fetch is tried again
+ * after a minute and keeps whatever list it had. (Not /api/pfp/index: a host
+ * with clean URLs on redirects anything ending in /index.)
  */
 import { lower } from '../index.js';
 
@@ -23,22 +25,24 @@ export function peerSource({ base, timeout = 1500, index = false, indexTtl = 600
   const root = String(base || '').replace(/\/+$/, '');
   const get = (url, ms) => (f || globalThis.fetch)(url, { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(ms) });
   let list = null;
-  let listAt = 0;
+  let tried = 0;
   async function known() {
-    if (!index) return null;
-    if (list && Date.now() - listAt < indexTtl) return list;
+    const now = Date.now();
+    if (now - tried < (list ? indexTtl : Math.min(indexTtl, 60000))) return list;
+    tried = now;
     try {
       const r = await get(`${root}/api/pfp/list`, Math.max(timeout, 10000));
       const j = r.ok ? await r.json() : null;
-      list = j && Array.isArray(j.addresses) ? new Set(j.addresses.map(lower)) : null;
-    } catch (e) { list = null; }
-    listAt = Date.now();
+      if (j && Array.isArray(j.addresses)) list = new Set(j.addresses.map(lower));
+    } catch (e) { /* kept as it was */ }
     return list;
   }
   return async function peer(address) {
     if (!root) return { none: true };
-    const set = await known();
-    if (set && !set.has(lower(address))) return { none: true };
+    if (index) {
+      const set = await known();
+      if (!set || !set.has(lower(address))) return { none: true };
+    }
     try {
       const r = await get(`${root}/api/pfp/${lower(address)}`, timeout);
       if (r.status === 404) return { none: true };
