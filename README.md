@@ -27,7 +27,7 @@ Every picture is fetched server-side, decoded, turned upright, cropped and writt
 
 ## One face across both galleries
 
-Each site answers `GET /api/pfp/{address}` with `peerSaid(record)`: `{ source, url, updated }` for a picture it found or was given, `{ source: 'none' }` for a collector who chose no picture there, and a 404 otherwise. A face that came from the other site is never said back to it. `peerSource({ base })` asks the other site before OpenSea, fails open in 1.5s, and with `index: true` reads the other site's `GET /api/pfp/index` (`{ addresses }`) once and asks only about wallets on it.
+Each site answers `GET /api/pfp/{address}` with `peerSaid(record)`: `{ source, url, updated }` for a picture it found or was given, `{ source: 'none' }` for a collector who chose no picture there, and a 404 otherwise. A face that came from the other site is never said back to it. `peerSource({ base })` asks the other site before OpenSea, fails open in 1.5s, and with `index: true` reads the other site's `GET /api/pfp/list` (`{ addresses }`) once and asks only about wallets on it.
 
 A collector's REMOVE on either site is passed through: the other site's round sets that wallet to none rather than filling it from OpenSea.
 

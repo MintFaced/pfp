@@ -140,7 +140,7 @@ test('sources: OpenSea defaults, ENS hints, X at full size, the peer and its lis
   const calls = [];
   const fake = async (url) => {
     calls.push(url);
-    if (url.endsWith('/api/pfp/index')) return new Response(JSON.stringify({ addresses: [A(1), A(2)] }));
+    if (url.endsWith('/api/pfp/list')) return new Response(JSON.stringify({ addresses: [A(1), A(2)] }));
     if (url.endsWith(A(1))) return new Response(JSON.stringify({ source: 'upload', url: 'https://other/1.webp', updated: 't' }));
     if (url.endsWith(A(2))) return new Response(JSON.stringify({ source: 'none', url: null }));
     return new Response('{}', { status: 404 });
@@ -149,7 +149,7 @@ test('sources: OpenSea defaults, ENS hints, X at full size, the peer and its lis
   assert.deepEqual(await peer(A(1)), { url: 'https://other/1.webp', origin: 'upload' });
   assert.deepEqual(await peer(A(2)), { none: true, chosen: true });
   assert.deepEqual(await peer(A(3)), { none: true });
-  assert.deepEqual(calls, ['https://other/api/pfp/index', `https://other/api/pfp/${A(1)}`, `https://other/api/pfp/${A(2)}`],
+  assert.deepEqual(calls, ['https://other/api/pfp/list', `https://other/api/pfp/${A(1)}`, `https://other/api/pfp/${A(2)}`],
     'the list read once, and a wallet not on it never asked about');
   const down = peerSource({ base: 'https://other', fetch: async () => { throw new Error('timeout'); } });
   assert.deepEqual(await down(A(1)), { error: 'peer did not answer' }, 'fail-open: the chain goes on');

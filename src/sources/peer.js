@@ -11,9 +11,11 @@
  * picture ends the chain: { none, chosen }.
  *
  * index: a site with far more wallets than the other has faces for can read
- * the other's whole list once (GET /api/pfp/index, { addresses }) and ask
+ * the other's whole list once (GET /api/pfp/list, { addresses }) and ask
  * only about the wallets on it, instead of once for every wallet it has. If
- * the list will not come, it asks about every wallet, as without one.
+ * the list will not come, it asks about every wallet, as without one. (Not
+ * /api/pfp/index: a host with clean URLs on redirects anything ending in
+ * /index to the path without it.)
  */
 import { lower } from '../index.js';
 
@@ -26,7 +28,7 @@ export function peerSource({ base, timeout = 1500, index = false, indexTtl = 600
     if (!index) return null;
     if (list && Date.now() - listAt < indexTtl) return list;
     try {
-      const r = await get(`${root}/api/pfp/index`, Math.max(timeout, 10000));
+      const r = await get(`${root}/api/pfp/list`, Math.max(timeout, 10000));
       const j = r.ok ? await r.json() : null;
       list = j && Array.isArray(j.addresses) ? new Set(j.addresses.map(lower)) : null;
     } catch (e) { list = null; }

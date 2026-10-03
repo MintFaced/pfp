@@ -1,6 +1,6 @@
 {
   "name": "@mintfaced/pfp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Hexagon profile pictures for collectors: the faces on mintface.art and theline.wtf.",
   "license": "MIT",
   "type": "module",
